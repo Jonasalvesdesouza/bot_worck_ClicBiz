@@ -1,0 +1,227 @@
+{
+    "clientes": [
+      {
+        "data": "2026-04-10",
+        "empresa": "ClicBiz Tecnologia",
+        "cod_cliente": "CLI001",
+        "nome_cliente": "João Silva",
+        "qtd_titulos_atrasados": 2,
+        "valor_atrasado": 350.75,
+        "dias_atraso": 5,
+        "status_cobranca": "Pendente",
+        "observacoes": "Cliente não respondeu última mensagem"
+      },
+      {
+        "data": "2026-04-08",
+        "empresa": "ClicBiz Tecnologia",
+        "cod_cliente": "CLI002",
+        "nome_cliente": "Maria Oliveira",
+        "qtd_titulos_atrasados": 1,
+        "valor_atrasado": 120.0,
+        "dias_atraso": 10,
+        "status_cobranca": "Em contato",
+        "observacoes": "Prometeu pagamento até sexta"
+      },
+      {
+        "data": "2026-04-01",
+        "empresa": "ClicBiz Tecnologia",
+        "cod_cliente": "CLI003",
+        "nome_cliente": "Carlos Souza",
+        "qtd_titulos_atrasados": 3,
+        "valor_atrasado": 980.5,
+        "dias_atraso": 20,
+        "status_cobranca": "Crítico",
+        "observacoes": "Sem retorno há mais de 15 dias"
+      },
+      {
+        "data": "2026-04-12",
+        "empresa": "ClicBiz Tecnologia",
+        "cod_cliente": "CLI004",
+        "nome_cliente": "Ana Costa",
+        "qtd_titulos_atrasados": 1,
+        "valor_atrasado": 200.0,
+        "dias_atraso": 2,
+        "status_cobranca": "Pendente",
+        "observacoes": "Primeiro contato ainda não realizado"
+      },
+      {
+        "data": "2026-03-28",
+        "empresa": "ClicBiz Tecnologia",
+        "cod_cliente": "CLI005",
+        "nome_cliente": "Fernanda Lima",
+        "qtd_titulos_atrasados": 4,
+        "valor_atrasado": 1500.0,
+        "dias_atraso": 30,
+        "status_cobranca": "Negociação",
+        "observacoes": "Parcelamento em andamento"
+      },
+  
+      {
+        "data": "2026-04-14",
+        "empresa": "ClicBiz Tecnologia",
+        "cod_cliente": "CLI006",
+        "nome_cliente": "Lucas Pereira",
+        "qtd_titulos_atrasados": 2,
+        "valor_atrasado": 420.3,
+        "dias_atraso": 7,
+        "status_cobranca": "Em contato",
+        "observacoes": "Visualizou mensagem mas não respondeu"
+      },
+      {
+        "data": "2026-03-20",
+        "empresa": "ClicBiz Tecnologia",
+        "cod_cliente": "CLI007",
+        "nome_cliente": "Patrícia Gomes",
+        "qtd_titulos_atrasados": 5,
+        "valor_atrasado": 2100.9,
+        "dias_atraso": 40,
+        "status_cobranca": "Crítico",
+        "observacoes": "Cliente bloqueou contato"
+      },
+      {
+        "data": "2026-04-05",
+        "empresa": "ClicBiz Tecnologia",
+        "cod_cliente": "CLI008",
+        "nome_cliente": "Ricardo Martins",
+        "qtd_titulos_atrasados": 1,
+        "valor_atrasado": 90.0,
+        "dias_atraso": 3,
+        "status_cobranca": "Pendente",
+        "observacoes": "Contato agendado"
+      },
+      {
+        "data": "2026-03-15",
+        "empresa": "ClicBiz Tecnologia",
+        "cod_cliente": "CLI009",
+        "nome_cliente": "Juliana Rocha",
+        "qtd_titulos_atrasados": 6,
+        "valor_atrasado": 3200.0,
+        "dias_atraso": 60,
+        "status_cobranca": "Crítico",
+        "observacoes": "Encaminhar para jurídico"
+      },
+      {
+        "data": "2026-04-11",
+        "empresa": "ClicBiz Tecnologia",
+        "cod_cliente": "CLI010",
+        "nome_cliente": "Bruno Alves",
+        "qtd_titulos_atrasados": 2,
+        "valor_atrasado": 600.0,
+        "dias_atraso": 12,
+        "status_cobranca": "Negociação",
+        "observacoes": "Solicitou desconto"
+      },
+  
+      {
+        "data": "2026-04-09",
+        "empresa": "ClicBiz Tecnologia",
+        "cod_cliente": "CLI011",
+        "nome_cliente": "Camila Ribeiro",
+        "qtd_titulos_atrasados": 1,
+        "valor_atrasado": 150.0,
+        "dias_atraso": 8,
+        "status_cobranca": "Em contato",
+        "observacoes": "Aguardando retorno"
+      },
+      {
+        "data": "2026-04-02",
+        "empresa": "ClicBiz Tecnologia",
+        "cod_cliente": "CLI012",
+        "nome_cliente": "Eduardo Nunes",
+        "qtd_titulos_atrasados": 3,
+        "valor_atrasado": 870.0,
+        "dias_atraso": 18,
+        "status_cobranca": "Crítico",
+        "observacoes": "Telefone fora de área"
+      },
+      {
+        "data": "2026-04-13",
+        "empresa": "ClicBiz Tecnologia",
+        "cod_cliente": "CLI013",
+        "nome_cliente": "Aline Barbosa",
+        "qtd_titulos_atrasados": 1,
+        "valor_atrasado": 75.0,
+        "dias_atraso": 1,
+        "status_cobranca": "Pendente",
+        "observacoes": "Cobrança recente"
+      },
+      {
+        "data": "2026-03-25",
+        "empresa": "ClicBiz Tecnologia",
+        "cod_cliente": "CLI014",
+        "nome_cliente": "Marcelo Teixeira",
+        "qtd_titulos_atrasados": 4,
+        "valor_atrasado": 1100.0,
+        "dias_atraso": 25,
+        "status_cobranca": "Negociação",
+        "observacoes": "Acordo quase fechado"
+      },
+      {
+        "data": "2026-03-18",
+        "empresa": "ClicBiz Tecnologia",
+        "cod_cliente": "CLI015",
+        "nome_cliente": "Renata Cardoso",
+        "qtd_titulos_atrasados": 5,
+        "valor_atrasado": 2500.0,
+        "dias_atraso": 45,
+        "status_cobranca": "Crítico",
+        "observacoes": "Sem resposta desde fevereiro"
+      },
+  
+      {
+        "data": "2026-04-06",
+        "empresa": "ClicBiz Tecnologia",
+        "cod_cliente": "CLI016",
+        "nome_cliente": "Gustavo Ferreira",
+        "qtd_titulos_atrasados": 2,
+        "valor_atrasado": 300.0,
+        "dias_atraso": 6,
+        "status_cobranca": "Em contato",
+        "observacoes": "Disse que vai verificar"
+      },
+      {
+        "data": "2026-04-07",
+        "empresa": "ClicBiz Tecnologia",
+        "cod_cliente": "CLI017",
+        "nome_cliente": "Larissa Mendes",
+        "qtd_titulos_atrasados": 1,
+        "valor_atrasado": 180.0,
+        "dias_atraso": 4,
+        "status_cobranca": "Pendente",
+        "observacoes": "Primeiro lembrete enviado"
+      },
+      {
+        "data": "2026-03-10",
+        "empresa": "ClicBiz Tecnologia",
+        "cod_cliente": "CLI018",
+        "nome_cliente": "Felipe Castro",
+        "qtd_titulos_atrasados": 7,
+        "valor_atrasado": 4100.0,
+        "dias_atraso": 70,
+        "status_cobranca": "Crítico",
+        "observacoes": "Cliente inadimplente recorrente"
+      },
+      {
+        "data": "2026-04-03",
+        "empresa": "ClicBiz Tecnologia",
+        "cod_cliente": "CLI019",
+        "nome_cliente": "Vanessa Duarte",
+        "qtd_titulos_atrasados": 2,
+        "valor_atrasado": 520.0,
+        "dias_atraso": 9,
+        "status_cobranca": "Negociação",
+        "observacoes": "Propôs parcelamento"
+      },
+      {
+        "data": "2026-04-15",
+        "empresa": "ClicBiz Tecnologia",
+        "cod_cliente": "CLI020",
+        "nome_cliente": "Diego Santos",
+        "qtd_titulos_atrasados": 1,
+        "valor_atrasado": 95.0,
+        "dias_atraso": 0,
+        "status_cobranca": "Novo",
+        "observacoes": "Título recém vencido"
+      }
+    ]
+  }
