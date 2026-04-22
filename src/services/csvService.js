@@ -10,17 +10,17 @@ function loadCustomers() {
     fs.createReadStream(CSV_FILE)
       .pipe(csv({ separator: CSV_SEPARATOR }))
       .on('data', (row) => {
-        const phone = extractPhone(row['Tel - Contato']);
-        const contact = extractContact(row['Tel - Contato']);
+        const phone = extractPhone(row['Phone - Contact']);
+        const contact = extractContact(row['Phone - Contact']);
 
         if (!phone) return;
 
         customers.push({
           phone,
           contact,
-          name: row['Nome Cliente'],
-          value: row['Valor Atrasado'],
-          delayDays: Number(row['Dias de Atraso']) || 0
+          name: row['Vame Client'],
+          value: row['Overdue amount'],
+          delayDays: Number(row['Days of Delay']) || 0
         });
       })
       .on('end', () => resolve(customers))

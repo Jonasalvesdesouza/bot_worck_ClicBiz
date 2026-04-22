@@ -1,3 +1,2 @@
-2026/04/22-16:00:10.871 10e8 Reusing MANIFEST E:\BACKUP_PARTIÇÃO_C\User\Recepção\Recpcao\Desktop\Recepção\BotCobranca\.wwebjs_auth\session-teste\Default\Sync Data\LevelDB/MANIFEST-000001
-2026/04/22-16:00:10.881 10e8 Recovering log #3
-2026/04/22-16:00:10.881 10e8 Reusing old log E:\BACKUP_PARTIÇÃO_C\User\Recepção\Recpcao\Desktop\Recepção\BotCobranca\.wwebjs_auth\session-teste\Default\Sync Data\LevelDB/000003.log 
+2026/04/22-16:23:04.708 f40 Creating DB E:\BACKUP_PARTIÇÃO_C\User\Recepção\Recpcao\Desktop\Recepção\BotCobranca\.wwebjs_auth\session-teste\Default\Sync Data\LevelDB since it was missing.
+2026/04/22-16:23:05.351 f40 Reusing MANIFEST E:\BACKUP_PARTIÇÃO_C\User\Recepção\Recpcao\Desktop\Recepção\BotCobranca\.wwebjs_auth\session-teste\Default\Sync Data\LevelDB/MANIFEST-000001

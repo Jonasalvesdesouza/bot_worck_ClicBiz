@@ -1,43 +1,12 @@
-2026/04/22-16:00:12.009 1ca8 Reusing MANIFEST E:\BACKUP_PARTIÇÃO_C\User\Recepção\Recpcao\Desktop\Recepção\BotCobranca\.wwebjs_auth\session-teste\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
-2026/04/22-16:00:12.010 1ca8 Recovering log #67
-2026/04/22-16:00:12.010 1ca8 Reusing old log E:\BACKUP_PARTIÇÃO_C\User\Recepção\Recpcao\Desktop\Recepção\BotCobranca\.wwebjs_auth\session-teste\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000067.log 
-2026/04/22-16:00:12.011 1ca8 Delete type=2 #61
-2026/04/22-16:00:12.011 1ca8 Delete type=2 #63
-2026/04/22-16:00:13.434 2a14 Compacting 1@1 + 1@2 files
-2026/04/22-16:00:13.471 2a14 Generated table #71@1: 247 keys, 5183 bytes
-2026/04/22-16:00:13.471 2a14 Compacted 1@1 + 1@2 files => 5183 bytes
-2026/04/22-16:00:13.527 2a14 compacted to: files[ 0 0 1 0 0 0 0 ]
-2026/04/22-16:00:13.527 2a14 Delete type=2 #59
-2026/04/22-16:00:13.527 2a14 Delete type=2 #69
-2026/04/22-16:00:14.645 10e8 Level-0 table #73: started
-2026/04/22-16:00:14.667 2888 Current memtable full; waiting...
-2026/04/22-16:00:14.723 10e8 Level-0 table #73: 80368 bytes OK
-2026/04/22-16:00:14.772 10e8 Delete type=0 #67
-2026/04/22-16:00:14.773 10e8 Level-0 table #75: started
-2026/04/22-16:00:14.852 10e8 Level-0 table #75: 1247 bytes OK
-2026/04/22-16:00:14.875 1ca8 Current memtable full; waiting...
-2026/04/22-16:00:14.909 10e8 Delete type=0 #72
-2026/04/22-16:00:14.910 10e8 Level-0 table #77: started
-2026/04/22-16:00:14.934 10e8 Level-0 table #77: 16939 bytes OK
-2026/04/22-16:00:14.976 10e8 Delete type=0 #74
-2026/04/22-16:00:14.976 10e8 Manual compaction at level-0 from '\x00&\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00'\x00\x00\x00' @ 0 : 0; will stop at '\x00(\x02\x02\x03\x00\x00\x00\x00\x00\x00\xf0?' @ 48210 : 0
-2026/04/22-16:00:14.976 10e8 Compacting 2@0 + 1@1 files
-2026/04/22-16:00:15.054 10e8 Generated table #78@0: 3712 keys, 40217 bytes
-2026/04/22-16:00:15.054 10e8 Compacted 2@0 + 1@1 files => 40217 bytes
-2026/04/22-16:00:15.064 10e8 compacted to: files[ 0 1 1 0 0 0 0 ]
-2026/04/22-16:00:15.065 10e8 Delete type=2 #77
-2026/04/22-16:00:15.065 1d34 Level-0 table #80: started
-2026/04/22-16:00:15.097 1d34 Level-0 table #80: 14106 bytes OK
-2026/04/22-16:00:15.116 1d34 Delete type=0 #76
-2026/04/22-16:00:15.117 10e8 Manual compaction at level-0 from '\x00'\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00(\x00\x00\x00' @ 0 : 0; will stop at '\x00)\x00\x00\xc8\x0d\x00l\x00o\x00c\x00a\x00l\x00_\x00s\x00t\x00o\x00r\x00a\x00g\x00e' @ 50207 : 0
-2026/04/22-16:00:15.117 10e8 Compacting 1@0 + 1@1 files
-2026/04/22-16:00:15.144 10e8 Generated table #81@0: 2353 keys, 20706 bytes
-2026/04/22-16:00:15.144 10e8 Compacted 1@0 + 1@1 files => 20706 bytes
-2026/04/22-16:00:15.174 10e8 compacted to: files[ 0 1 1 0 0 0 0 ]
-2026/04/22-16:00:15.174 10e8 Delete type=2 #78
-2026/04/22-16:00:15.174 10e8 Delete type=2 #80
-2026/04/22-16:00:15.175 10e8 Manual compaction at level-0 from '\x00)\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00*\x00\x00\x00' @ 0 : 0; will stop at (end)
-2026/04/22-16:00:15.175 10e8 Manual compaction at level-0 from '\x00(\x02\x02\x03\x00\x00\x00\x00\x00\x00\xf0?' @ 48210 : 0 .. '\x00'\x00\x00\x00' @ 0 : 0; will stop at (end)
-2026/04/22-16:00:15.175 10e8 Manual compaction at level-0 from '\x00)\x00\x00\xc8\x0d\x00l\x00o\x00c\x00a\x00l\x00_\x00s\x00t\x00o\x00r\x00a\x00g\x00e' @ 50207 : 0 .. '\x00(\x00\x00\x00' @ 0 : 0; will stop at (end)
-2026/04/22-16:00:15.175 10e8 Manual compaction at level-0 from '\x00%\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00&\x00\x00\x00' @ 0 : 0; will stop at (end)
-2026/04/22-16:00:15.176 3718 Manual compaction at level-0 from '\x00(\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00)\x00\x00\x00' @ 0 : 0; will stop at (end)
+2026/04/22-16:23:09.813 36f8 Creating DB E:\BACKUP_PARTIÇÃO_C\User\Recepção\Recpcao\Desktop\Recepção\BotCobranca\.wwebjs_auth\session-teste\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb since it was missing.
+2026/04/22-16:23:09.945 36f8 Reusing MANIFEST E:\BACKUP_PARTIÇÃO_C\User\Recepção\Recpcao\Desktop\Recepção\BotCobranca\.wwebjs_auth\session-teste\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2026/04/22-16:24:40.047 36f8 Level-0 table #5: started
+2026/04/22-16:24:40.172 36f8 Level-0 table #5: 999452 bytes OK
+2026/04/22-16:24:40.200 36f8 Delete type=0 #3
+2026/04/22-16:24:44.744 36f8 Level-0 table #7: started
+2026/04/22-16:24:44.853 36f8 Level-0 table #7: 1138557 bytes OK
+2026/04/22-16:24:44.885 36f8 Delete type=0 #4
+2026/04/22-16:24:44.903 36f8 Compacting 1@1 + 1@2 files
+2026/04/22-16:24:45.076 36f8 Generated table #8@1: 22895 keys, 1023321 bytes
+2026/04/22-16:24:45.076 36f8 Compacted 1@1 + 1@2 files => 1023321 bytes
+2026/04/22-16:24:45.100 36f8 compacted to: files[ 0 0 1 0 0 0 0 ]

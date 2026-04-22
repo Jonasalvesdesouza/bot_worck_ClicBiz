@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-function salvarJSON(dados, caminho = 'data/client.json') {
+function saveJson(dados, caminho = 'data/client.json') {
   fs.writeFileSync(
     caminho,
     JSON.stringify(dados, null, 2),
@@ -8,4 +8,4 @@ function salvarJSON(dados, caminho = 'data/client.json') {
   );
 }
 
-module.exports = { salvarJSON };
+module.exports = { saveJson };
