@@ -1,7 +1,7 @@
-Cod Cliente;Nome Cliente;Tel - Contato;Situaï¿½ï¿½o;Qtd Tï¿½tulos Atrasados;Valor Atrasado;Dias de Atraso;ï¿½ltimo Pagamento;Dt Ultima Ligaï¿½ï¿½o Cobranï¿½a;Obs Pagamento
-4140;Josï¿½ Piareti;Tel: (17) 991271933 - Contato: Josï¿½ Piareti;Ativo;1;R$ 534,23;751;;13/04/2026 17:12;
-7537;Geovane Piroca Mole;Tel: (66) 99732695 - Contato: Geovane Piroca Mole;Ativo;5;R$ 2.195,61;106;;09/04/2026 10:44;
-7419;Felipe Guei;Tel: (17) 992685953 - Contato: Felipe Guei;Ativo;1;R$ 399,40;30;;17/04/2026 10:03;
-2403;Jonatan Emo;Tel: (17) 981886660 - Contato: Jonatan Emo;Ativo;1;R$ 245,21;1;;17/04/2026 11:31;
-7578;Geovane Piroca Mole;Tel: (66) 99732695 - Contato: Geovane Piroca Mole;Ativo;5;R$ 100,00;50;;09/04/2026 10:44;
-7515;Geovane Piroca Mole;Tel: (66) 99732695 - Contato: Geovane Piroca Mole;Ativo;5;R$ 109,60;23;;09/04/2026 10:44;
+Cod Cliente;Nome Cliente;Tel - Contato;Situação;Qtd Títulos Atrasados;Valor Atrasado;Dias de Atraso;último Pagamento;Dt Ultima Ligação Cobrança;Obs Pagamento
+4140;Game House Tetudinha LTDA;Tel: (17) 991271933 - Contato: José Piareti;Ativo;1;R$ 534,23;90;;13/04/2026 17:12;
+7537;Venda de Consolo LTDA;Tel: (66) 99732695 - Contato: Geovane Piroca Mole;Ativo;5;R$ 2.195,61;106;;09/04/2026 10:44;
+7419;Drugs Smoke no Furebis LTDA;Tel: (17) 992685953 - Contato: Felipe Guei;Ativo;1;R$ 399,40;30;;17/04/2026 10:03;
+2403;Churras Pançudo LTDA;Tel: (17) 981886660 - Contato: Jonatan Emo;Ativo;1;R$ 245,21;1;;17/04/2026 11:31;
+7578;Sexy Anales LTDA;Tel: (66) 99732695 - Contato: Geovane Piroca Mole;Ativo;5;R$ 100,00;50;;09/04/2026 10:44;
+7515;Lingerie Para Homens;Tel: (66) 99732695 - Contato: Geovane Piroca Mole;Ativo;5;R$ 109,60;23;;09/04/2026 10:44;

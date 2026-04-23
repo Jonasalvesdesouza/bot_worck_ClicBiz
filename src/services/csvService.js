@@ -2,30 +2,33 @@ const fs = require('fs');
 const csv = require('csv-parser');
 const { CSV_FILE, CSV_SEPARATOR } = require('../config/env');
 const { extractPhone, extractContact } = require('../utils/phone');
+const { saveJson } = require('./jsonService');
 
-function loadCustomers() {
+function convertCsvToJson() {
   return new Promise((resolve, reject) => {
     const customers = [];
-
     fs.createReadStream(CSV_FILE)
       .pipe(csv({ separator: CSV_SEPARATOR }))
       .on('data', (row) => {
-        const phone = extractPhone(row['Phone - Contact']);
-        const contact = extractContact(row['Phone - Contact']);
-
+        const rawPhone = row['Tel - Contato'];
+        const phone = extractPhone(rawPhone);
+        const contact = extractContact(rawPhone);
         if (!phone) return;
-
         customers.push({
           phone,
           contact,
-          name: row['Vame Client'],
-          value: row['Overdue amount'],
-          delayDays: Number(row['Days of Delay']) || 0
+          codCliente: row['Cod Cliente'],
+          company: row['Nome Cliente'],
+          value: row['Valor Atrasado'].trim(), // ✅ usa o valor do CSV sem adicionar R$
+          delayDays: Number(row['Dias de Atraso']) || 0
         });
       })
-      .on('end', () => resolve(customers))
+      .on('end', () => {
+        saveJson(customers);
+        resolve();
+      })
       .on('error', reject);
   });
 }
 
-module.exports = { loadCustomers };
+module.exports = { convertCsvToJson };

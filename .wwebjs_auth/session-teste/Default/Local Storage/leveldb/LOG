@@ -1,2 +1,5 @@
-2026/04/22-16:23:05.337 3a88 Creating DB E:\BACKUP_PARTIÇÃO_C\User\Recepção\Recpcao\Desktop\Recepção\BotCobranca\.wwebjs_auth\session-teste\Default\Local Storage\leveldb since it was missing.
-2026/04/22-16:23:06.480 3a88 Reusing MANIFEST E:\BACKUP_PARTIÇÃO_C\User\Recepção\Recpcao\Desktop\Recepção\BotCobranca\.wwebjs_auth\session-teste\Default\Local Storage\leveldb/MANIFEST-000001
+2026/04/23-10:33:03.508 385c Reusing MANIFEST E:\BACKUP_PARTIÇÃO_C\User\Recepção\Recpcao\Desktop\Recepção\BotCobranca\.wwebjs_auth\session-teste\Default\Local Storage\leveldb/MANIFEST-000001
+2026/04/23-10:33:03.523 385c Recovering log #3
+2026/04/23-10:33:03.524 385c Level-0 table #3: started
+2026/04/23-10:33:03.601 385c Level-0 table #3: 18900 bytes OK
+2026/04/23-10:33:03.649 385c Delete type=0 #3

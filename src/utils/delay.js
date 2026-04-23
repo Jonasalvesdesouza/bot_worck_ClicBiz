@@ -5,7 +5,8 @@ function delay(ms) {
 }
 
 function randomDelay() {
-  return DELAY + Math.floor(Math.random() * 4000);
+  const ms = DELAY + Math.floor(Math.random() * 4000);
+  return delay(ms); 
 }
 
 module.exports = { delay, randomDelay };

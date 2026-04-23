@@ -5,12 +5,11 @@ const { randomDelay } = require('../utils/delay');
 
 function groupByPhone(customers) {
   const map = {};
-
   for (const c of customers) {
-    if (!map[c.phone]) map[c.phone] = [];
-    map[c.phone].push(c);
+    const key = c.phone; // ✅ agrupa pelo telefone
+    if (!map[key]) map[key] = [];
+    map[key].push(c);
   }
-
   return Object.values(map);
 }
 
@@ -18,16 +17,28 @@ async function processSend(customers) {
   const groups = groupByPhone(customers);
 
   for (const group of groups) {
-    const phone = group[0].phone;
+    try {
+      const phone = group[0].phone;
+      const contact = group[0].contact;
+      const { valid, phone: validPhone } = await isValidNumber(phone);
 
-    const valid = await isValidNumber(phone);
-    if (!valid) continue;
+      if (!valid) {
+        console.log(`❌ Número inválido: ${phone} (${contact})`);
+        continue;
+      }
 
-    const message = generateMessage(group);
-
-    await sendMessage(phone, message);
-    await randomDelay();
+      console.log(`📤 Enviando para: ${validPhone} (${contact}) — ${group.length} titulo(s)`);
+      const message = generateMessage(group);
+      console.log(`📝 Mensagem:\n${message}\n`);
+      await sendMessage(validPhone, message);
+      await randomDelay();
+    } catch (err) {
+      console.warn(`⚠️ Erro no grupo ${group[0].contact}: ${err.message}`);
+      continue;
+    }
   }
+
+  console.log('✅ Envio finalizado!');
 }
 
 module.exports = { processSend };

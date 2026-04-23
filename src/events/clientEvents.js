@@ -1,6 +1,7 @@
 const qrcode = require('qrcode-terminal');
 const client = require('../client/whatsappClient');
-const { loadCustomers } = require('../services/csvService');
+const { convertCsvToJson } = require('../services/csvService');
+const { loadJson } = require('../services/jsonService');
 const { processSend } = require('../processors/sendProcessor');
 
 function startEvents() {
@@ -11,10 +12,10 @@ function startEvents() {
 
   client.on('ready', async () => {
     console.log('Bot ready');
-
-    const customers = await loadCustomers();
-    await processSend(customers);
-
+    await convertCsvToJson();         // 1️⃣ CSV -> JSON
+    const customers = loadJson();     // 2️⃣ lê o JSON
+    console.log(`📋 ${customers.length} clientes carregados`);
+    await processSend(customers);     // 3️⃣ agrupa por phone e envia
     client.destroy();
   });
 }
