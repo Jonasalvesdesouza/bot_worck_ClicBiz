@@ -2,4 +2,5 @@
 .wwebjs_cache
 node_modules
 .env
-data
+data/client.cvs
+data/client.json
