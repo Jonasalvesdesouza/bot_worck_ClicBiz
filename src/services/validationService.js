@@ -1,27 +1,39 @@
 const client = require('../client/whatsappClient');
 
+function normalize(phone) {
+  // remove tudo que não for número
+  return phone.replace(/\D/g, '');
+}
+
 async function isValidNumber(phone) {
   try {
-    // Tenta o número como veio
-    const result = await client.getNumberId(phone);
-    if (result) return { valid: true, phone };
+    const clean = normalize(phone);
 
-    // Se falhou e tem 13 dígitos (55 + DDD + 9 + 8dig), tenta sem o 9
-    if (phone.length === 13) {
-      const fallback = phone.slice(0, 4) + phone.slice(5); // remove o 9
-      const result2 = await client.getNumberId(fallback);
-      if (result2) return { valid: true, phone: fallback };
+    // Lista de tentativas
+    const attempts = new Set();
+
+    // Número original
+    attempts.add(clean);
+
+    // Se não tiver código do país, adiciona 55
+    if (!clean.startsWith('55')) {
+      attempts.add('55' + clean);
     }
 
-    // Se tem 12 dígitos (55 + DDD + 8dig), tenta com o 9
-    if (phone.length === 12) {
-      const fallback = phone.slice(0, 4) + '9' + phone.slice(4); // insere o 9
-      const result2 = await client.getNumberId(fallback);
-      if (result2) return { valid: true, phone: fallback };
+    // Testa todas as possibilidades
+    for (const attempt of attempts) {
+      console.log(`🔍 Testando: ${attempt}`);
+      const result = await client.getNumberId(attempt);
+      if (result) {
+        return { valid: true, phone: attempt };
+      }
     }
 
+    console.warn(`⚠️ Número não encontrado no WhatsApp: ${phone}`);
     return { valid: false, phone };
-  } catch {
+
+  } catch (err) {
+    console.error(`❌ Erro ao validar número ${phone}:`, err.message);
     return { valid: false, phone };
   }
 }

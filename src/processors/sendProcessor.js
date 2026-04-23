@@ -6,7 +6,7 @@ const { randomDelay } = require('../utils/delay');
 function groupByPhone(customers) {
   const map = {};
   for (const c of customers) {
-    const key = c.phone; // ✅ agrupa pelo telefone
+    const key = c.phone;
     if (!map[key]) map[key] = [];
     map[key].push(c);
   }
@@ -15,30 +15,45 @@ function groupByPhone(customers) {
 
 async function processSend(customers) {
   const groups = groupByPhone(customers);
+  console.log(`📦 ${groups.length} grupo(s) de envio (por telefone)`);
+
+  let enviados = 0;
+  let falhos = 0;
 
   for (const group of groups) {
+    const phone = group[0].phone;
+    const contact = group[0].contact;
+
     try {
-      const phone = group[0].phone;
-      const contact = group[0].contact;
       const { valid, phone: validPhone } = await isValidNumber(phone);
 
       if (!valid) {
-        console.log(`❌ Número inválido: ${phone} (${contact})`);
+        console.log(`❌ Número inválido ou não está no WhatsApp: ${phone} (${contact})`);
+        falhos++;
         continue;
       }
 
-      console.log(`📤 Enviando para: ${validPhone} (${contact}) — ${group.length} titulo(s)`);
+      console.log(`📤 Enviando para: ${validPhone} (${contact}) — ${group.length} título(s)`);
+
       const message = generateMessage(group);
-      console.log(`📝 Mensagem:\n${message}\n`);
+
+      // ✅ ADICIONADO: exibe prévia da mensagem para facilitar debug
+      console.log(`📝 Prévia:\n${message}\n${'─'.repeat(40)}`);
+
       await sendMessage(validPhone, message);
+      enviados++;
+
       await randomDelay();
     } catch (err) {
-      console.warn(`⚠️ Erro no grupo ${group[0].contact}: ${err.message}`);
+      // ✅ CORRIGIDO: agora captura o erro relançado pelo sendMessage
+      console.error(`⚠️ Falha no grupo de ${contact} (${phone}): ${err.message}`);
+      falhos++;
       continue;
     }
   }
 
-  console.log('✅ Envio finalizado!');
+  // ✅ ADICIONADO: resumo final
+  console.log(`\n✅ Envio finalizado! Enviados: ${enviados} | Falhos: ${falhos}`);
 }
 
 module.exports = { processSend };

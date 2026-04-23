@@ -6,16 +6,13 @@ function extractPhone(text) {
   // Pega os últimos 10 ou 11 dígitos (DDD + número)
   const local = numbers.slice(-11);
 
+  // Já tem DDD + 9 dígitos
   if (local.length === 11) {
-    // Já tem DDD + 9 dígitos
     return `55${local}`;
   }
-
+// Já tem DDD + 8 dígitos
   if (local.length === 10) {
-    // DDD + 8 dígitos — celular antigo, insere o 9 após o DDD
-    const ddd = local.slice(0, 2);
-    const num = local.slice(2);
-    return `55${ddd}9${num}`;
+    return `55${local}`;
   }
 
   return null; // número inválido
