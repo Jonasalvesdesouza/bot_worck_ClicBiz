@@ -5,7 +5,7 @@ function delay(ms) {
 }
 
 function randomDelay() {
-  const ms = DELAY + Math.floor(Math.random() * 4000);
+  const ms = DELAY + Math.floor(Math.random() * 60000);
   return delay(ms); 
 }
 

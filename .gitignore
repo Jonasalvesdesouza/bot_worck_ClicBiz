@@ -4,3 +4,4 @@ node_modules
 .env
 data/client.cvs
 data/client.json
+data/client 07-05-2026.csv
