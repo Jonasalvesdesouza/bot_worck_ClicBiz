@@ -1,9 +1,10 @@
 const fs = require('fs');
 const csv = require('csv-parser');
-const iconv = require('iconv-lite');        // ✅ converte Windows-1252 → UTF-8
+const iconv = require('iconv-lite');
 const { CSV_FILE, CSV_SEPARATOR } = require('../config/env');
 const { extractPhone, extractContact } = require('../utils/phone');
 const { saveJson } = require('./jsonService');
+const { normalizeName } = require('../utils/normalizeName'); // ✅ normaliza nomes
 
 function convertCsvToJson() {
   return new Promise((resolve, reject) => {
@@ -14,7 +15,7 @@ function convertCsvToJson() {
     const customers = [];
 
     fs.createReadStream(CSV_FILE)
-      .pipe(iconv.decodeStream('win1252'))  // ✅ decodifica antes do csv-parser
+      .pipe(iconv.decodeStream('win1252'))
       .pipe(csv({ separator: CSV_SEPARATOR }))
       .on('data', (row) => {
         const rawPhone = row['Tel - Contato'];
@@ -25,7 +26,7 @@ function convertCsvToJson() {
         }
 
         const phone = extractPhone(rawPhone);
-        const contact = extractContact(rawPhone);
+        const contact = normalizeName(extractContact(rawPhone)); // ✅ normaliza aqui
 
         if (!phone) {
           console.warn(`⚠️ Telefone inválido ignorado: "${rawPhone}"`);
