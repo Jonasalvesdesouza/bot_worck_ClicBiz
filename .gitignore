@@ -2,7 +2,7 @@
 .wwebjs_cache
 node_modules
 .env
-data/client.cvs
+data/client.csv
 data/client.json
 data/client 07-05-2026.csv
 data/client 11-05-2026.csv
