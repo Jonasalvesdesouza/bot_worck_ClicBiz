@@ -15,7 +15,7 @@ const { randomDelay } = require('../utils/delay');
 //   phone:   "5517991204960",
 //   contact: "Rodrigo Marque Vieira",
 //   empresas: [
-//     { company, quantidadeBoletos, value, delayDays },
+//     { company, overdueCount, value, delayDays },
 //     ...
 //   ]
 // }
@@ -42,12 +42,12 @@ function groupByPhone(customers) {
       };
     }
 
-    // Cada linha do CSV representa uma empresa com sua própria dívida
+    // cada linha do CSV representa uma empresa com sua própria dívida
     map[key].empresas.push({
-      company:           c.company,
-      quantidadeBoletos: c.quantidadeBoletos,
-      value:             c.value,
-      delayDays:         c.delayDays,
+      company:      c.company,
+      overdueCount: c.overdueCount, // quantidade de títulos atrasados
+      value:        c.value,
+      delayDays:    c.delayDays,
     });
   }
 
@@ -81,7 +81,7 @@ async function processSend(customers) {
         continue;
       }
 
-      const totalBoletos = empresas.reduce((sum, e) => sum + e.quantidadeBoletos, 0);
+      const totalBoletos = empresas.reduce((sum, e) => sum + e.overdueCount, 0);
       console.log(`📤 Enviando para: ${validPhone} (${contact}) — ${empresas.length} empresa(s) | ${totalBoletos} boleto(s)`);
 
       const message = generateMessage(group);

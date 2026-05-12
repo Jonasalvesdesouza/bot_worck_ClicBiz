@@ -28,7 +28,7 @@ const pluralizeValor = (qty) =>
  * Ex singular : "1 boleto vencido | R$ 566,31 | 15 dia(s) em atraso"
  * Ex plural   : "3 boletos vencidos | R$ 976,20 | 76 dia(s) em atraso"
  */
-function buildEmpresaLine({ company, quantidadeBoletos: qty, value, delayDays }) {
+function buildEmpresaLine({ company, overdueCount: qty, value, delayDays }) {
   const boleto = pluralizeBoleto(qty);
   return `• *${company}*: ${qty} ${boleto} — ${value} — ${delayDays} dia(s) em atraso`;
 }
@@ -91,43 +91,43 @@ function getMaxUrgency(empresas) {
 const SINGLE_COMPANY_TEMPLATES = {
 
   firstContact({ greeting, contact, empresa }) {
-    const { company, quantidadeBoletos: qty, value, delayDays } = empresa;
+    const { company, overdueCount: qty, value, delayDays } = empresa;
     const opening = buildOpeningLine(greeting, contact);
     return `${opening} Identificamos ${qty} ${pluralizeBoleto(qty)} em aberto no valor de ${value}, referente à empresa *${company}* — ${delayDays} dia(s) em atraso.
 
-Por gentileza, poderia nos informar se já há uma previsão de pagamento para ${pluralizeValor(qty)}?
+Por gentileza, poderia nos informar previsão de pagamento? para ${pluralizeValor(qty)}?
 
 Fico inteiramente à disposição para reenviar ${pluralizeBoletoComArtigo(qty)} ou auxiliá-lo no que for necessário. Agradecemos a atenção e aguardamos seu retorno.`;
   },
 
   followUp({ greeting, contact, empresa }) {
-    const { company, quantidadeBoletos: qty, value, delayDays } = empresa;
+    const { company, overdueCount: qty, value, delayDays } = empresa;
     const opening = buildOpeningLine(greeting, contact);
     return `${opening} Identificamos ${qty} ${pluralizeBoleto(qty)} em aberto no valor de ${value}, referente à empresa *${company}* — ${delayDays} dia(s) em atraso.
 
-Poderia nos informar uma previsão de pagamento para ${pluralizeValor(qty)}?
+Poderia nos informar previsão de pagamento para ${pluralizeValor(qty)}?
 
 Caso necessite ${pluralizeBoletoContraido(qty)} atualizado ou de qualquer outra informação, estamos à disposição para auxiliá-lo. Agradecemos a atenção.`;
   },
 
   urgency({ greeting, contact, empresa }) {
-    const { company, quantidadeBoletos: qty, value, delayDays } = empresa;
+    const { company, overdueCount: qty, value, delayDays } = empresa;
     const opening = buildOpeningLine(greeting, contact);
     return `${opening} Identificamos ${qty} ${pluralizeBoleto(qty)} em aberto no valor de ${value}, referente à empresa *${company}* — ${delayDays} dia(s) em atraso — que ainda consta como pendente em nossos registros.
 
-Poderia nos informar uma previsão de pagamento para ${pluralizeValor(qty)}?
+Poderia nos informar previsão de pagamento para ${pluralizeValor(qty)}?
 
 Permanecemos à disposição para reenviar ${pluralizeBoletoComArtigo(qty)} ou esclarecer qualquer dúvida. Desde já, agradecemos a atenção.`;
   },
 
   critical({ greeting, contact, empresa }) {
-    const { company, quantidadeBoletos: qty, value, delayDays } = empresa;
+    const { company, overdueCount: qty, value, delayDays } = empresa;
     const opening = buildOpeningLine(greeting, contact);
     return `${opening} Identificamos ${qty} ${pluralizeBoleto(qty)} em aberto no valor de ${value}, referente à empresa *${company}* — ${delayDays} dia(s) em atraso.
 
 Informamos que, para evitar interrupções no sistema, é necessária a regularização de ${pluralizeValor(qty)} com brevidade. Caso o pagamento não seja identificado em nossos registros, o acesso poderá ser suspenso temporariamente.
 
-Por gentileza, poderia nos informar uma previsão de pagamento ainda hoje?
+Por gentileza, poderia nos informar previsão de pagamento ainda hoje?
 
 Estamos inteiramente à disposição para reenviar ${pluralizeBoletoComArtigo(qty)} ou prestar qualquer esclarecimento necessário. Contamos com a sua compreensão e agradecemos a atenção.`;
   },
@@ -149,7 +149,7 @@ const MULTI_COMPANY_TEMPLATES = {
 
 ${lista}
 
-Por gentileza, poderia nos informar se já há uma previsão de pagamento para esses valores?
+Poderia nos informar previsão de pagamento?
 
 Fico inteiramente à disposição para reenviar os boletos ou auxiliá-lo no que for necessário. Agradecemos a atenção e aguardamos seu retorno.`;
   },
@@ -160,7 +160,7 @@ Fico inteiramente à disposição para reenviar os boletos ou auxiliá-lo no que
 
 ${lista}
 
-Poderia nos informar uma previsão de pagamento para esses valores?
+Poderia nos informar previsão de pagamento para esses valores?
 
 Caso necessite dos boletos atualizados ou de qualquer outra informação, estamos à disposição para auxiliá-lo. Agradecemos a atenção.`;
   },
@@ -171,7 +171,7 @@ Caso necessite dos boletos atualizados ou de qualquer outra informação, estamo
 
 ${lista}
 
-Poderia nos informar uma previsão de pagamento para esses valores?
+Poderia nos informar previsão de pagamento para esses valores?
 
 Permanecemos à disposição para reenviar os boletos ou esclarecer qualquer dúvida. Desde já, agradecemos a atenção.`;
   },
@@ -184,7 +184,7 @@ ${lista}
 
 Para evitar interrupções no sistema, é necessária a regularização desses valores com brevidade. Caso os pagamentos não sejam identificados em nossos registros, o acesso poderá ser suspenso temporariamente.
 
-Por gentileza, poderia nos informar uma previsão de pagamento ainda hoje?
+Por gentileza, poderia nos informar previsão de pagamento ainda hoje?
 
 Estamos inteiramente à disposição para reenviar os boletos ou prestar qualquer esclarecimento necessário. Contamos com a sua compreensão e agradecemos a atenção.`;
   },

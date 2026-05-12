@@ -42,10 +42,11 @@ function convertCsvToJson() {
         customers.push({
           phone,
           contact,
-          codCliente: row['Cod Cliente'],
-          company: row['Nome Cliente'],
-          value: rawValue.trim(),
-          delayDays: Number(row['Dias de Atraso']) || 0,
+          codCliente:   row['Cod Cliente'],
+          company:      row['Nome Cliente'],
+          overdueCount: Number(row['Qtd Títulos Atrasados']) || 0, // quantidade de títulos atrasados
+          value:        rawValue.trim(),
+          delayDays:    Number(row['Dias de Atraso']) || 0,
         });
       })
       .on('end', () => {
