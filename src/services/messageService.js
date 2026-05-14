@@ -18,6 +18,10 @@ const pluralizeBoletoContraido = (qty) =>
 const pluralizeValor = (qty) =>
   qty === 1 ? 'esse valor em aberto' : 'esses valores em aberto';
 
+// "no valor de R$ X" (1 boleto) | "totalizando R$ X" (mais de um)
+const pluralizeValorTotal = (qty, value) =>
+  qty === 1 ? `no valor de ${value}` : `totalizando ${value}`;
+
 // ─────────────────────────────────────────────────────────────
 // Builders de trechos reutilizáveis
 // ─────────────────────────────────────────────────────────────
@@ -93,9 +97,9 @@ const SINGLE_COMPANY_TEMPLATES = {
   firstContact({ greeting, contact, empresa }) {
     const { company, overdueCount: qty, value, delayDays } = empresa;
     const opening = buildOpeningLine(greeting, contact);
-    return `${opening} Identificamos ${qty} ${pluralizeBoleto(qty)} em aberto no valor de ${value}, referente à empresa *${company}* — ${delayDays} dia(s) em atraso.
+    return `${opening} Identificamos ${qty} ${pluralizeBoleto(qty)} em aberto ${pluralizeValorTotal(qty, value)}, referente à empresa *${company}* — ${delayDays} dia(s) em atraso.
 
-Por gentileza, poderia nos informar previsão de pagamento? para ${pluralizeValor(qty)}?
+Por gentileza, poderia nos informar previsão de pagamento para ${pluralizeValor(qty)}?
 
 Fico inteiramente à disposição para reenviar ${pluralizeBoletoComArtigo(qty)} ou auxiliá-lo no que for necessário. Agradecemos a atenção e aguardamos seu retorno.`;
   },
@@ -103,7 +107,7 @@ Fico inteiramente à disposição para reenviar ${pluralizeBoletoComArtigo(qty)}
   followUp({ greeting, contact, empresa }) {
     const { company, overdueCount: qty, value, delayDays } = empresa;
     const opening = buildOpeningLine(greeting, contact);
-    return `${opening} Identificamos ${qty} ${pluralizeBoleto(qty)} em aberto no valor de ${value}, referente à empresa *${company}* — ${delayDays} dia(s) em atraso.
+    return `${opening} Identificamos ${qty} ${pluralizeBoleto(qty)} em aberto ${pluralizeValorTotal(qty, value)}, referente à empresa *${company}* — ${delayDays} dia(s) em atraso.
 
 Poderia nos informar previsão de pagamento para ${pluralizeValor(qty)}?
 
@@ -113,7 +117,7 @@ Caso necessite ${pluralizeBoletoContraido(qty)} atualizado ou de qualquer outra 
   urgency({ greeting, contact, empresa }) {
     const { company, overdueCount: qty, value, delayDays } = empresa;
     const opening = buildOpeningLine(greeting, contact);
-    return `${opening} Identificamos ${qty} ${pluralizeBoleto(qty)} em aberto no valor de ${value}, referente à empresa *${company}* — ${delayDays} dia(s) em atraso — que ainda consta como pendente em nossos registros.
+    return `${opening} Identificamos ${qty} ${pluralizeBoleto(qty)} em aberto ${pluralizeValorTotal(qty, value)}, referente à empresa *${company}* — ${delayDays} dia(s) em atraso — que ainda consta como pendente em nossos registros.
 
 Poderia nos informar previsão de pagamento para ${pluralizeValor(qty)}?
 
@@ -123,7 +127,7 @@ Permanecemos à disposição para reenviar ${pluralizeBoletoComArtigo(qty)} ou e
   critical({ greeting, contact, empresa }) {
     const { company, overdueCount: qty, value, delayDays } = empresa;
     const opening = buildOpeningLine(greeting, contact);
-    return `${opening} Identificamos ${qty} ${pluralizeBoleto(qty)} em aberto no valor de ${value}, referente à empresa *${company}* — ${delayDays} dia(s) em atraso.
+    return `${opening} Identificamos ${qty} ${pluralizeBoleto(qty)} em aberto ${pluralizeValorTotal(qty, value)}, referente à empresa *${company}* — ${delayDays} dia(s) em atraso.
 
 Informamos que, para evitar interrupções no sistema, é necessária a regularização de ${pluralizeValor(qty)} com brevidade. Caso o pagamento não seja identificado em nossos registros, o acesso poderá ser suspenso temporariamente.
 
@@ -232,6 +236,7 @@ module.exports = {
   pluralizeBoleto,
   pluralizeBoletoComArtigo,
   pluralizeValor,
+  pluralizeValorTotal,
   getUrgencyLevel,
   buildEmpresaLine,
 };

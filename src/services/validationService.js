@@ -6,23 +6,36 @@ function normalize(phone) {
 }
 
 async function isValidNumber(phone) {
+  // ✅ FIX Bug #2: client.destroy() desmonta o browser Puppeteer, mas o
+  //    loop do processSend pode ter chamadas de getNumberId já enfileiradas.
+  //    Verificar pupPage antes de usar evita o erro
+  //    "Attempted to use detached Frame" e os falsos negativos de validação
+  //    que apareciam no final do log após o destroy.
+  if (!client.pupPage) {
+    console.warn(`⚠️ Cliente já encerrado — validação cancelada para ${phone}`);
+    return { valid: false, phone };
+  }
+
   try {
     const clean = normalize(phone);
 
-    // Lista de tentativas
     const attempts = new Set();
-
-    // Número original
     attempts.add(clean);
 
-    // Se não tiver código do país, adiciona 55
     if (!clean.startsWith('55')) {
       attempts.add('55' + clean);
     }
 
-    // Testa todas as possibilidades
     for (const attempt of attempts) {
       console.log(`🔍 Testando: ${attempt}`);
+
+      // ✅ Dupla checagem dentro do loop: o destroy pode ocorrer enquanto
+      //    iteramos (ex.: timeout longo + Ctrl+C), então checamos de novo.
+      if (!client.pupPage) {
+        console.warn(`⚠️ Cliente encerrado durante validação de ${phone}`);
+        return { valid: false, phone };
+      }
+
       const result = await client.getNumberId(attempt);
       if (result) {
         return { valid: true, phone: attempt };
