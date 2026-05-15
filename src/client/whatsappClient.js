@@ -5,7 +5,8 @@ const client = new Client({
   authStrategy: new LocalAuth({ clientId: SESSION }),
   puppeteer: {
     headless: true,
-    args: ['--no-sandbox']
+    args: ['--no-sandbox'],
+    protocolTimeout: 180_000, // 3 minutos
   }
 });
 
