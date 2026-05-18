@@ -4,6 +4,32 @@ const { isValidNumber } = require('../services/validationService');
 const { randomDelay } = require('../utils/delay');
 
 // ─────────────────────────────────────────────────────────────
+// Normalização defensiva do telefone
+//
+// Remove todos os não-dígitos e garante o prefixo 55.
+// Serve como chave canônica de agrupamento, independente de como
+// o número chegou do CSV (com ou sem espaços, traços, parênteses,
+// código de país duplicado, etc.).
+//
+// Exemplos:
+//   "(17) 99120-4960"  → "5517991204960"
+//   "17 9 9120-4960"   → "5517991204960"
+//   "5517991204960"    → "5517991204960"
+//   "+55 17 99120-4960"→ "5517991204960"
+// ─────────────────────────────────────────────────────────────
+function normalizePhoneKey(phone) {
+  // 1. Remove tudo que não for dígito
+  const digits = String(phone).replace(/\D/g, '');
+
+  // 2. Remove prefixo 55 duplicado antes de re-adicionar
+  //    (evita "555517..." quando o número já veio com código de país)
+  const local = digits.startsWith('55') ? digits.slice(2) : digits;
+
+  // 3. Retorna sempre no formato canônico "55XXXXXXXXXXX"
+  return `55${local}`;
+}
+
+// ─────────────────────────────────────────────────────────────
 // Agrupamento em duas dimensões
 //
 // Dimensão 1 — telefone/contato : define QUEM recebe a mensagem
@@ -12,8 +38,8 @@ const { randomDelay } = require('../utils/delay');
 //
 // Estrutura resultante por grupo:
 // {
-//   phone:   "5517991204960",
-//   contact: "Rodrigo Marque Vieira",
+//   phone:   "5517991204960",   ← chave canônica
+//   contact: "Rodrigo Marques Vieira",
 //   empresas: [
 //     { company, overdueCount, value, delayDays },
 //     ...
@@ -22,8 +48,15 @@ const { randomDelay } = require('../utils/delay');
 // ─────────────────────────────────────────────────────────────
 
 /**
- * Agrupa os clientes por telefone e, dentro de cada grupo,
+ * Agrupa os clientes por telefone normalizado e, dentro de cada grupo,
  * consolida as empresas mantendo seus dados individuais.
+ *
+ * Regras:
+ *  - A chave do mapa é sempre o telefone canônico (normalizePhoneKey).
+ *  - O nome do contato é o da PRIMEIRA ocorrência do número
+ *    (evita sobrescrever com variações ortográficas da mesma pessoa).
+ *  - Empresas duplicadas (mesmo nome + mesmo valor + mesmo atraso)
+ *    são ignoradas para prevenir duplo-envio em caso de CSV reprocessado.
  *
  * @param {Array<object>} customers - Lista bruta do JSON
  * @returns {Array<object>} - Lista de grupos prontos para envio
@@ -32,23 +65,37 @@ function groupByPhone(customers) {
   const map = {};
 
   for (const c of customers) {
-    const key = c.phone;
+    const key = normalizePhoneKey(c.phone);
 
     if (!map[key]) {
       map[key] = {
-        phone:    c.phone,
-        contact:  c.contact,
+        phone:    key,        // sempre no formato canônico
+        contact:  c.contact,  // nome da primeira ocorrência
         empresas: [],
       };
     }
 
-    // cada linha do CSV representa uma empresa com sua própria dívida
-    map[key].empresas.push({
-      company:      c.company,
-      overdueCount: c.overdueCount, // quantidade de títulos atrasados
-      value:        c.value,
-      delayDays:    c.delayDays,
-    });
+    // Deduplicação de empresa: ignora se já existe entrada com
+    // mesmo nome de empresa + mesmo valor + mesmo número de dias de atraso
+    const jaExiste = map[key].empresas.some(
+      e =>
+        e.company      === c.company &&
+        e.value        === c.value   &&
+        e.delayDays    === c.delayDays
+    );
+
+    if (!jaExiste) {
+      map[key].empresas.push({
+        company:      c.company,
+        overdueCount: c.overdueCount,
+        value:        c.value,
+        delayDays:    c.delayDays,
+      });
+    } else {
+      console.warn(
+        `⚠️ Entrada duplicada ignorada: ${c.company} | ${c.value} | ${c.delayDays}d → ${key}`
+      );
+    }
   }
 
   return Object.values(map);
@@ -66,6 +113,15 @@ async function processSend(customers) {
   const totalEmpresas = customers.length;
   console.log(`📦 ${groups.length} contato(s) | ${totalEmpresas} empresa(s) no total`);
 
+  // Diagnóstico: lista grupos com mais de uma empresa
+  const multiEmpresa = groups.filter(g => g.empresas.length > 1);
+  if (multiEmpresa.length > 0) {
+    console.log(`🔗 ${multiEmpresa.length} contato(s) com múltiplas empresas agrupadas:`);
+    multiEmpresa.forEach(g =>
+      console.log(`   → ${g.phone} (${g.contact}): ${g.empresas.map(e => e.company).join(', ')}`)
+    );
+  }
+
   let enviados = 0;
   let falhos   = 0;
 
@@ -82,7 +138,10 @@ async function processSend(customers) {
       }
 
       const totalBoletos = empresas.reduce((sum, e) => sum + e.overdueCount, 0);
-      console.log(`📤 Enviando para: ${validPhone} (${contact}) — ${empresas.length} empresa(s) | ${totalBoletos} boleto(s)`);
+      console.log(
+        `📤 Enviando para: ${validPhone} (${contact}) — ` +
+        `${empresas.length} empresa(s) | ${totalBoletos} boleto(s)`
+      );
 
       const message = generateMessage(group);
 
