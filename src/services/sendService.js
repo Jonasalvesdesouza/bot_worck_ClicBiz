@@ -1,23 +1,50 @@
 const client = require('../client/whatsappClient');
 const { delay } = require('../utils/delay');
 
-async function sendMessage(phone, message) {
+const ackPromises = new Map();
+
+client.on('message_ack', (ack) => {
+  const pending = ackPromises.get(ack.id.id);
+  if (pending) {
+    if (ack.ack >= 2) {
+      clearTimeout(pending.timeout);
+      pending.resolve(true);
+      ackPromises.delete(ack.id.id);
+    }
+  }
+});
+
+async function sendMessage(phone, message, retries = 2) {
   const wid = `${phone}@c.us`;
+  for (let i = 0; i <= retries; i++) {
+    try {
+      await delay(1000);
+      const result = await client.sendMessage(wid, message);
+      const msgId = result.id.id;
+      console.log(`📤 Mensagem enviada ao servidor (ID: ${msgId})`);
 
-  // ✅ ADICIONADO: log do WID antes de tentar enviar (facilita debug)
-  console.log(`🔄 Tentando enviar para: ${wid}`);
+      // Aguarda ack
+      const ackPromise = new Promise((resolve) => {
+        const timeout = setTimeout(() => {
+          if (ackPromises.has(msgId)) {
+            ackPromises.delete(msgId);
+            resolve(false);
+          }
+        }, 30000);
+        ackPromises.set(msgId, { resolve, timeout });
+      });
 
-  try {
-    await delay(1000);
-    const result = await client.sendMessage(wid, message);
-
-    // ✅ ADICIONADO: confirma com ID da mensagem retornado pelo WhatsApp
-  console.log(`✅ Mensagem enviada para ${phone} — ID: ${result?.id?._serialized ?? 'N/A'}`);
-  } catch (err) {
-    // ✅ CORRIGIDO: usa console.error (não warn) e relança o erro
-    //    para que sendProcessor possa registrar e continuar corretamente
-    console.error(`❌ Erro ao enviar para ${phone}:`, err.message);
-    throw err; // relança para o processSend tratar no seu próprio try/catch
+      const delivered = await ackPromise;
+      if (delivered) {
+        console.log(`✅ Mensagem entregue para ${phone}`);
+      } else {
+        console.warn(`⚠️ Mensagem enviada, mas confirmação de entrega não recebida para ${phone}`);
+      }
+      return;
+    } catch (err) {
+      if (i === retries) throw err;
+      await delay(5000);
+    }
   }
 }
 

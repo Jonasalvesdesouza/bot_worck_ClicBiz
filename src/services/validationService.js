@@ -1,54 +1,63 @@
 const client = require('../client/whatsappClient');
+const { normalizePhoneToDDI } = require('../utils/phone');
+const { delay } = require('../utils/delay');
 
-function normalize(phone) {
-  // remove tudo que não for número
-  return phone.replace(/\D/g, '');
+let isShuttingDown = false;
+
+function setShuttingDown(state) {
+  isShuttingDown = state;
 }
 
 async function isValidNumber(phone) {
-  // ✅ FIX Bug #2: client.destroy() desmonta o browser Puppeteer, mas o
-  //    loop do processSend pode ter chamadas de getNumberId já enfileiradas.
-  //    Verificar pupPage antes de usar evita o erro
-  //    "Attempted to use detached Frame" e os falsos negativos de validação
-  //    que apareciam no final do log após o destroy.
-  if (!client.pupPage) {
-    console.warn(`⚠️ Cliente já encerrado — validação cancelada para ${phone}`);
+  if (isShuttingDown) {
+    console.warn(`⏸️ Validação abortada (shutdown): ${phone}`);
     return { valid: false, phone };
   }
 
+  const clean = normalizePhoneToDDI(phone);
+  if (!clean) return { valid: false, phone };
+
   try {
-    const clean = normalize(phone);
-
-    const attempts = new Set();
-    attempts.add(clean);
-
-    if (!clean.startsWith('55')) {
-      attempts.add('55' + clean);
-    }
-
-    for (const attempt of attempts) {
-      console.log(`🔍 Testando: ${attempt}`);
-
-      // ✅ Dupla checagem dentro do loop: o destroy pode ocorrer enquanto
-      //    iteramos (ex.: timeout longo + Ctrl+C), então checamos de novo.
-      if (!client.pupPage) {
-        console.warn(`⚠️ Cliente encerrado durante validação de ${phone}`);
-        return { valid: false, phone };
-      }
-
-      const result = await client.getNumberId(attempt);
-      if (result) {
-        return { valid: true, phone: attempt };
-      }
-    }
-
-    console.warn(`⚠️ Número não encontrado no WhatsApp: ${phone}`);
-    return { valid: false, phone };
-
+    const result = await client.getNumberId(clean);
+    if (result) return { valid: true, phone: clean };
+    console.warn(`❌ Número não registrado no WhatsApp: ${clean}`);
+    return { valid: false, phone: clean };
   } catch (err) {
-    console.error(`❌ Erro ao validar número ${phone}:`, err.message);
-    return { valid: false, phone };
+    console.error(`Erro na validação de ${clean}:`, err.message);
+    return { valid: false, phone: clean };
   }
 }
 
-module.exports = { isValidNumber };
+async function validateBatch(phones, concurrency = 1) {
+  const { default: pLimit } = await import('p-limit');
+  const limit = pLimit(concurrency);
+  const results = await Promise.all(
+    phones.map(phone => limit(() => isValidNumber(phone)))
+  );
+  return results;
+}
+
+async function waitForClientReady(timeout = 60000) {
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    if (client.info && client.info.wid) {
+      console.log('✅ Cliente pronto!');
+      return true;
+    }
+    console.log('⏳ Aguardando cliente ficar pronto...');
+    await delay(2000);
+    // Tenta uma validação dummy com um número fixo de teste (opcional)
+    try {
+      // Usa um número conhecido seu ou apenas verifica se client.pupPage existe
+      if (client.pupPage && !client.pupPage.isClosed()) {
+        console.log('✅ Cliente aparentemente pronto (página aberta)');
+        return true;
+      }
+    } catch (err) {
+      // ignora e continua aguardando
+    }
+  }
+  throw new Error('Timeout aguardando cliente WhatsApp ficar pronto');
+}
+
+module.exports = { isValidNumber, validateBatch, setShuttingDown, waitForClientReady };

@@ -1,119 +1,61 @@
-const fs = require('fs');
-const csv = require('csv-parser');
-const iconv = require('iconv-lite');
-const { CSV_FILE, CSV_SEPARATOR } = require('../config/env');
-const { extractPhone, extractContact } = require('../utils/phone');
-const { saveJson, loadJson } = require('../services/jsonService');
-const { normalizeName } = require('../utils/normalizeName');
 const client = require('../client/whatsappClient');
-const { processSend } = require('../processors/sendProcessor'); // ✅ caminho corrigido
+const { jaRodouHoje, registrarExecucao } = require('../utils/runGuard');
+const { setShuttingDown } = require('../services/validationService');
+const { run } = require('../services/orchestrator');
 
-// ✅ Flag para imprimir as colunas apenas na primeira linha (evita spam no log)
-let headersLogado = false;
-
-function convertCsvToJson() {
-  return new Promise((resolve, reject) => {
-    if (!fs.existsSync(CSV_FILE)) {
-      return reject(new Error(`❌ Arquivo CSV não encontrado: ${CSV_FILE}`));
-    }
-
-    headersLogado = false;
-    const customers = [];
-
-    fs.createReadStream(CSV_FILE)
-      .pipe(iconv.decodeStream('win1252'))
-      .pipe(csv({ separator: CSV_SEPARATOR }))
-      .on('data', (rawRow) => {
-
-        // ✅ CORREÇÃO: normaliza todas as chaves e valores
-        //    Remove BOM (\uFEFF), espaços extras e normaliza para UTF-8
-        const row = Object.fromEntries(
-          Object.entries(rawRow).map(([k, v]) => [
-            k.trim().replace(/^\uFEFF/, ''),
-            typeof v === 'string' ? v.trim() : v,
-          ])
-        );
-
-        // 🔍 DIAGNÓSTICO: imprime as colunas reais na primeira linha
-        if (!headersLogado) {
-          console.log('🗂️  Colunas encontradas no CSV:');
-          Object.keys(row).forEach(col => console.log(`   → "${col}"`));
-          headersLogado = true;
-        }
-
-        const rawPhone = row['Tel - Contato'];
-
-        if (!rawPhone) {
-          console.warn('⚠️ Linha sem telefone ignorada:', row);
-          return;
-        }
-
-        const phone = extractPhone(rawPhone);
-        const contact = normalizeName(extractContact(rawPhone));
-
-        if (!phone) {
-          console.warn(`⚠️ Telefone inválido ignorado: "${rawPhone}"`);
-          return;
-        }
-
-        const rawValue = row['Valor Atrasado'];
-        if (!rawValue) {
-          // 🔍 DIAGNÓSTICO: mostra o valor bruto da coluna para identificar o problema
-          console.warn(`⚠️ Valor ausente para: ${row['Nome Cliente']} | Valor bruto: "${rawRow['Valor Atrasado']}" | Valor trim: "${row['Valor Atrasado']}"`);
-          return;
-        }
-
-        customers.push({
-          phone,
-          contact,
-          codCliente:   row['Cod Cliente'],
-          company:      row['Nome Cliente'],
-          overdueCount: Number(row['Qtd Títulos Atrasados']) || 0,
-          value:        rawValue,
-          delayDays:    Number(row['Dias de Atraso']) || 0,
-        });
-      })
-      .on('end', () => {
-        console.log(`📂 CSV lido: ${customers.length} cliente(s) válido(s)`);
-        saveJson(customers);
-        resolve();
-      })
-      .on('error', (err) => {
-        console.error('❌ Erro ao ler CSV:', err.message);
-        reject(err);
-      });
-  });
-}
+let jaProcessou = false;
+let isShuttingDown = false;
 
 function startEvents() {
   client.on('qr', (qr) => {
-    console.log('📱 QR Code gerado — escaneie pelo WhatsApp:');
-    // Descomente a linha abaixo se instalar o pacote qrcode-terminal:
-    // require('qrcode-terminal').generate(qr, { small: true });
-    console.log(qr);
+    console.log('📱 Escaneie o QR Code:');
+    require('qrcode-terminal').generate(qr, { small: true });
   });
 
   client.on('ready', async () => {
-    console.log('✅ WhatsApp conectado! Iniciando processamento...');
+    console.log('✅ EVENTO READY DISPARADO');
+    
     try {
-      await convertCsvToJson();
-      const customers = loadJson();
-      await processSend(customers);
+      if (jaProcessou) return;
+      jaProcessou = true;
+  
+      console.log('✅ WhatsApp conectado!');
+      if (await jaRodouHoje()) {
+        console.log('🚫 Já executado hoje. Encerrando.');
+        await gracefulShutdown();
+        return;
+      }
+  
+      await run(); // orquestrador principal
+      await registrarExecucao();
     } catch (err) {
-      console.error('❌ Erro durante o processamento:', err.message);
+      console.error('❌ Erro fatal no evento ready:', err.message);
+      await gracefulShutdown(1);
     } finally {
-      console.log('🔌 Encerrando conexão...');
-      client.destroy();
+      await gracefulShutdown();
     }
   });
-
-  client.on('auth_failure', (msg) => {
-    console.error('❌ Falha de autenticação:', msg);
+  
+  client.on('message_ack', (ack) => {
+    console.log(`📬 ACK para ${ack.id.id} | Status: ${ack.ack}`);
+    // ack.ack: 0 = enviado, 1 = entregue ao servidor, 2 = entregue ao dispositivo, 3 = lido
   });
-
-  client.on('disconnected', (reason) => {
-    console.warn('⚠️ Cliente desconectado:', reason);
-  });
+  client.on('auth_failure', (msg) => console.error('❌ Auth falhou:', msg));
+  client.on('disconnected', (reason) => console.warn('⚠️ Desconectado:', reason));
 }
 
-module.exports = { convertCsvToJson, startEvents };
+async function gracefulShutdown(exitCode = 0) {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+  setShuttingDown(true);
+  console.log('🛑 Finalizando...');
+  try {
+    await client.destroy();
+    console.log('👋 Cliente encerrado.');
+  } catch (err) {
+    console.warn('⚠️ Erro ao destruir cliente:', err.message);
+  }
+  process.exit(exitCode);
+}
+
+module.exports = { startEvents, gracefulShutdown };

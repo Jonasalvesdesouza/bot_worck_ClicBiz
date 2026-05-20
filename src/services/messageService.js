@@ -1,7 +1,7 @@
 const { getGreeting } = require('../utils/greeting');
 
 // ─────────────────────────────────────────────────────────────
-// Helpers de pluralização — funções puras e reutilizáveis
+// Helpers de pluralização
 // ─────────────────────────────────────────────────────────────
 
 const pluralizeBoleto = (qty) =>
@@ -10,62 +10,61 @@ const pluralizeBoleto = (qty) =>
 const pluralizeBoletoComArtigo = (qty) =>
   qty === 1 ? 'o boleto vencido' : 'os boletos vencidos';
 
-// "do boleto vencido" | "dos boletos vencidos"  (de + artigo contraídos)
 const pluralizeBoletoContraido = (qty) =>
   qty === 1 ? 'do boleto vencido' : 'dos boletos vencidos';
 
-// "esse valor em aberto" | "esses valores em aberto"
 const pluralizeValor = (qty) =>
   qty === 1 ? 'esse valor em aberto' : 'esses valores em aberto';
 
-// "no valor de R$ X" (1 boleto) | "totalizando R$ X" (mais de um)
 const pluralizeValorTotal = (qty, value) =>
   qty === 1 ? `no valor de ${value}` : `totalizando ${value}`;
 
 // ─────────────────────────────────────────────────────────────
-// Builders de trechos reutilizáveis
+// Formatação da lista de boletos (sempre exibe, mesmo com 1 boleto)
 // ─────────────────────────────────────────────────────────────
 
-/**
- * Resumo de boletos de UMA empresa — usado na lista por empresa.
- *
- * Ex singular : "1 boleto vencido | R$ 566,31 | 15 dia(s) em atraso"
- * Ex plural   : "3 boletos vencidos | R$ 976,20 | 76 dia(s) em atraso"
- */
-function buildEmpresaLine({ company, overdueCount: qty, value, delayDays }) {
-  const boleto = pluralizeBoleto(qty);
-  return `• *${company}*: ${qty} ${boleto} — ${value} — ${delayDays} dia(s) em atraso`;
+function formatarListaBoletos(boletos) {
+  if (!boletos || boletos.length === 0) return '';
+  return boletos.map(b => {
+    const titulo = b.titulo || 'Título não informado';
+    const data = b.dtVenc || 'data não informada';
+    const valor = b.vlTitulo || 'valor não informado';
+    return `   ${titulo}  |   ${data}  |  ${valor}`;
+  }).join('\n');
 }
 
-/**
- * Bloco completo de listagem de empresas.
- * Usado quando o contato é responsável por mais de uma empresa.
- */
+// ─────────────────────────────────────────────────────────────
+// Builder de linha da empresa (usado em listas multi-empresa)
+// ─────────────────────────────────────────────────────────────
+
+function buildEmpresaLine(empresa) {
+  const qty = empresa.boletos.length;
+  const boletoWord = pluralizeBoleto(qty);
+  const listaBoletos = formatarListaBoletos(empresa.boletos);
+  const linhaPrincipal = `• *${empresa.company}*: ${qty} ${boletoWord} — ${empresa.valorComJuros} — ${empresa.delayDays} dia(s) em atraso`;
+  // Agora SEMPRE exibe a lista se existir (não depende do qty > 1)
+  if (listaBoletos) {
+    return `${linhaPrincipal}\n📆 *Boletos:*\n${listaBoletos}`;
+  }
+  return linhaPrincipal;
+}
+
 function buildEmpresaList(empresas) {
-  return empresas.map(buildEmpresaLine).join('\n');
+  return empresas.map(buildEmpresaLine).join('\n\n');
 }
 
-/**
- * Linha de abertura padrão (sem ponto final — cada template decide como continuar).
- */
+// ─────────────────────────────────────────────────────────────
+// Abertura padrão
+// ─────────────────────────────────────────────────────────────
+
 function buildOpeningLine(greeting, contact) {
-  return (
-    `${greeting}, ${contact}. Espero que esta mensagem o encontre bem.\n\n` +
-    `Meu nome é Jonas e represento a *Clic Biz*.`
-  );
+  return `${greeting}, ${contact}. Espero que esta mensagem o encontre bem.\n\nMeu nome é Jonas e represento a *Clic Biz*.`;
 }
 
 // ─────────────────────────────────────────────────────────────
-// Seleção de nível de urgência por empresa
+// Níveis de urgência
 // ─────────────────────────────────────────────────────────────
 
-/**
- * Retorna o nível de urgência com base nos dias de atraso.
- * Usado para ordenar empresas (mais crítica primeiro) e para
- * selecionar o tom geral da mensagem quando há múltiplas empresas.
- *
- * @returns {'critical' | 'urgency' | 'followUp' | 'firstContact'}
- */
 function getUrgencyLevel(delayDays) {
   if (delayDays > 90) return 'critical';
   if (delayDays > 60) return 'urgency';
@@ -75,10 +74,6 @@ function getUrgencyLevel(delayDays) {
 
 const URGENCY_ORDER = { critical: 0, urgency: 1, followUp: 2, firstContact: 3 };
 
-/**
- * Retorna o nível de urgência mais alto entre todas as empresas do grupo.
- * Define o tom geral da mensagem quando o contato tem múltiplas empresas.
- */
 function getMaxUrgency(empresas) {
   return empresas.reduce((max, e) => {
     const level = getUrgencyLevel(e.delayDays);
@@ -87,152 +82,146 @@ function getMaxUrgency(empresas) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Templates — empresa única
-//
-// Recebem o contexto completo do grupo + a única empresa.
+// Templates para empresa única
 // ─────────────────────────────────────────────────────────────
 
 const SINGLE_COMPANY_TEMPLATES = {
-
   firstContact({ greeting, contact, empresa }) {
-    const { company, overdueCount: qty, value, delayDays } = empresa;
+    const { company, boletos, valorComJuros, delayDays } = empresa;
+    const qty = boletos.length;
     const opening = buildOpeningLine(greeting, contact);
-    return `${opening} Identificamos ${qty} ${pluralizeBoleto(qty)} em aberto ${pluralizeValorTotal(qty, value)}, referente à empresa *${company}* — ${delayDays} dia(s) em atraso.
+    const listaBoletos = formatarListaBoletos(boletos);
+    const boletoText = pluralizeBoleto(qty);
+    const valorTotalText = pluralizeValorTotal(qty, valorComJuros);
+    const valorText = pluralizeValor(qty);
+    const artigoText = pluralizeBoletoComArtigo(qty);
 
-Por gentileza, poderia nos informar previsão de pagamento para ${pluralizeValor(qty)}?
+    let corpo = `${opening} Identificamos ${qty} ${boletoText} em aberto ${valorTotalText}, referente à empresa *${company}* — ${delayDays} dia(s) em atraso.\n\n`;
 
-Fico inteiramente à disposição para reenviar ${pluralizeBoletoComArtigo(qty)} ou auxiliá-lo no que for necessário. Agradecemos a atenção e aguardamos seu retorno.`;
+    // SEMPRE exibe a lista de boletos (se existir)
+    if (listaBoletos) {
+      corpo += `📆 *Boletos:*\n${listaBoletos}\n\n`;
+    }
+
+    corpo += `Por gentileza, poderia nos informar previsão de pagamento para ${valorText}?\n\n`;
+    corpo += `Fico inteiramente à disposição para reenviar ${artigoText} ou auxiliá-lo no que for necessário. Agradecemos a atenção e aguardamos seu retorno.`;
+    return corpo;
   },
 
   followUp({ greeting, contact, empresa }) {
-    const { company, overdueCount: qty, value, delayDays } = empresa;
+    const { company, boletos, valorComJuros, delayDays } = empresa;
+    const qty = boletos.length;
     const opening = buildOpeningLine(greeting, contact);
-    return `${opening} Identificamos ${qty} ${pluralizeBoleto(qty)} em aberto ${pluralizeValorTotal(qty, value)}, referente à empresa *${company}* — ${delayDays} dia(s) em atraso.
+    const listaBoletos = formatarListaBoletos(boletos);
+    const boletoText = pluralizeBoleto(qty);
+    const valorTotalText = pluralizeValorTotal(qty, valorComJuros);
+    const valorText = pluralizeValor(qty);
+    const contraidoText = pluralizeBoletoContraido(qty);
 
-Poderia nos informar previsão de pagamento para ${pluralizeValor(qty)}?
+    let corpo = `${opening} Identificamos ${qty} ${boletoText} em aberto ${valorTotalText}, referente à empresa *${company}* — ${delayDays} dia(s) em atraso.\n\n`;
 
-Caso necessite ${pluralizeBoletoContraido(qty)} atualizado ou de qualquer outra informação, estamos à disposição para auxiliá-lo. Agradecemos a atenção.`;
+    if (listaBoletos) {
+      corpo += `📆 *Boletos:*\n${listaBoletos}\n\n`;
+    }
+
+    corpo += `Poderia nos informar previsão de pagamento para ${valorText}?\n\n`;
+    corpo += `Caso necessite ${contraidoText} atualizado ou de qualquer outra informação, estamos à disposição para auxiliá-lo. Agradecemos a atenção.`;
+    return corpo;
   },
 
   urgency({ greeting, contact, empresa }) {
-    const { company, overdueCount: qty, value, delayDays } = empresa;
+    const { company, boletos, valorComJuros, delayDays } = empresa;
+    const qty = boletos.length;
     const opening = buildOpeningLine(greeting, contact);
-    return `${opening} Identificamos ${qty} ${pluralizeBoleto(qty)} em aberto ${pluralizeValorTotal(qty, value)}, referente à empresa *${company}* — ${delayDays} dia(s) em atraso — que ainda consta como pendente em nossos registros.
+    const listaBoletos = formatarListaBoletos(boletos);
+    const boletoText = pluralizeBoleto(qty);
+    const valorTotalText = pluralizeValorTotal(qty, valorComJuros);
+    const valorText = pluralizeValor(qty);
+    const artigoText = pluralizeBoletoComArtigo(qty);
 
-Poderia nos informar previsão de pagamento para ${pluralizeValor(qty)}?
+    let corpo = `${opening} Identificamos ${qty} ${boletoText} em aberto ${valorTotalText}, referente à empresa *${company}* — ${delayDays} dia(s) em atraso — que ainda consta como pendente em nossos registros.\n\n`;
 
-Permanecemos à disposição para reenviar ${pluralizeBoletoComArtigo(qty)} ou esclarecer qualquer dúvida. Desde já, agradecemos a atenção.`;
+    if (listaBoletos) {
+      corpo += `📆 *Boletos:*\n${listaBoletos}\n\n`;
+    }
+
+    corpo += `Poderia nos informar previsão de pagamento para ${valorText}?\n\n`;
+    corpo += `Permanecemos à disposição para reenviar ${artigoText} ou esclarecer qualquer dúvida. Desde já, agradecemos a atenção.`;
+    return corpo;
   },
 
   critical({ greeting, contact, empresa }) {
-    const { company, overdueCount: qty, value, delayDays } = empresa;
+    const { company, boletos, valorComJuros, delayDays } = empresa;
+    const qty = boletos.length;
     const opening = buildOpeningLine(greeting, contact);
-    return `${opening} Identificamos ${qty} ${pluralizeBoleto(qty)} em aberto ${pluralizeValorTotal(qty, value)}, referente à empresa *${company}* — ${delayDays} dia(s) em atraso.
+    const listaBoletos = formatarListaBoletos(boletos);
+    const boletoText = pluralizeBoleto(qty);
+    const valorTotalText = pluralizeValorTotal(qty, valorComJuros);
+    const valorText = pluralizeValor(qty);
+    const artigoText = pluralizeBoletoComArtigo(qty);
 
-Informamos que, para evitar interrupções no sistema, é necessária a regularização de ${pluralizeValor(qty)} com brevidade. Caso o pagamento não seja identificado em nossos registros, o acesso poderá ser suspenso temporariamente.
+    let corpo = `${opening} Identificamos ${qty} ${boletoText} em aberto ${valorTotalText}, referente à empresa *${company}* — ${delayDays} dia(s) em atraso.\n\n`;
 
-Por gentileza, poderia nos informar previsão de pagamento ainda hoje?
+    if (listaBoletos) {
+      corpo += `📆 *Boletos:*\n${listaBoletos}\n\n`;
+    }
 
-Estamos inteiramente à disposição para reenviar ${pluralizeBoletoComArtigo(qty)} ou prestar qualquer esclarecimento necessário. Contamos com a sua compreensão e agradecemos a atenção.`;
+    corpo += `Informamos que, para evitar interrupções no sistema, é necessária a regularização de ${valorText} com brevidade. Caso o pagamento não seja identificado em nossos registros, o acesso poderá ser suspenso temporariamente.\n\n`;
+    corpo += `Por gentileza, poderia nos informar previsão de pagamento ainda hoje?\n\n`;
+    corpo += `Estamos inteiramente à disposição para reenviar ${artigoText} ou prestar qualquer esclarecimento necessário. Contamos com a sua compreensão e agradecemos a atenção.`;
+    return corpo;
   },
 };
 
 // ─────────────────────────────────────────────────────────────
-// Templates — múltiplas empresas
-//
-// O contato é responsável por mais de uma empresa.
-// As empresas são listadas em bloco, ordenadas da mais crítica.
-// O tom geral segue a empresa de maior urgência.
+// Templates para múltiplas empresas
 // ─────────────────────────────────────────────────────────────
 
 const MULTI_COMPANY_TEMPLATES = {
-
   firstContact({ greeting, contact, empresas, lista }) {
     const opening = buildOpeningLine(greeting, contact);
-    return `${opening} Identificamos pendências em aberto vinculadas ao seu cadastro:
-
-${lista}
-
-Poderia nos informar previsão de pagamento?
-
-Fico inteiramente à disposição para reenviar os boletos ou auxiliá-lo no que for necessário. Agradecemos a atenção e aguardamos seu retorno.`;
+    return `${opening} Identificamos pendências em aberto vinculadas ao seu cadastro:\n\n${lista}\n\nPoderia nos informar previsão de pagamento?\n\nFico inteiramente à disposição para reenviar os boletos ou auxiliá-lo no que for necessário. Agradecemos a atenção e aguardamos seu retorno.`;
   },
 
   followUp({ greeting, contact, empresas, lista }) {
     const opening = buildOpeningLine(greeting, contact);
-    return `${opening} Verificamos que os seguintes valores permanecem em aberto no seu cadastro:
-
-${lista}
-
-Poderia nos informar previsão de pagamento para esses valores?
-
-Caso necessite dos boletos atualizados ou de qualquer outra informação, estamos à disposição para auxiliá-lo. Agradecemos a atenção.`;
+    return `${opening} Verificamos que os seguintes valores permanecem em aberto no seu cadastro:\n\n${lista}\n\nPoderia nos informar previsão de pagamento para esses valores?\n\nCaso necessite dos boletos atualizados ou de qualquer outra informação, estamos à disposição para auxiliá-lo. Agradecemos a atenção.`;
   },
 
   urgency({ greeting, contact, empresas, lista }) {
     const opening = buildOpeningLine(greeting, contact);
-    return `${opening} Constatamos que os seguintes títulos ainda constam como pendentes em nossos registros:
-
-${lista}
-
-Poderia nos informar previsão de pagamento para esses valores?
-
-Permanecemos à disposição para reenviar os boletos ou esclarecer qualquer dúvida. Desde já, agradecemos a atenção.`;
+    return `${opening} Constatamos que os seguintes títulos ainda constam como pendentes em nossos registros:\n\n${lista}\n\nPoderia nos informar previsão de pagamento para esses valores?\n\nPermanecemos à disposição para reenviar os boletos ou esclarecer qualquer dúvida. Desde já, agradecemos a atenção.`;
   },
 
   critical({ greeting, contact, empresas, lista }) {
     const opening = buildOpeningLine(greeting, contact);
-    return `${opening} Identificamos títulos em aberto vinculados ao seu cadastro, incluindo valores com atraso significativo:
-
-${lista}
-
-Para evitar interrupções no sistema, é necessária a regularização desses valores com brevidade. Caso os pagamentos não sejam identificados em nossos registros, o acesso poderá ser suspenso temporariamente.
-
-Por gentileza, poderia nos informar previsão de pagamento ainda hoje?
-
-Estamos inteiramente à disposição para reenviar os boletos ou prestar qualquer esclarecimento necessário. Contamos com a sua compreensão e agradecemos a atenção.`;
+    return `${opening} Identificamos títulos em aberto vinculados ao seu cadastro, incluindo valores com atraso significativo:\n\n${lista}\n\nPara evitar interrupções no sistema, é necessária a regularização desses valores com brevidade. Caso os pagamentos não sejam identificados em nossos registros, o acesso poderá ser suspenso temporariamente.\n\nPor gentileza, poderia nos informar previsão de pagamento ainda hoje?\n\nEstamos inteiramente à disposição para reenviar os boletos ou prestar qualquer esclarecimento necessário. Contamos com a sua compreensão e agradecemos a atenção.`;
   },
 };
 
 // ─────────────────────────────────────────────────────────────
-// API pública
+// Função principal
 // ─────────────────────────────────────────────────────────────
 
-/**
- * Gera a mensagem de cobrança para um grupo (contato/telefone).
- *
- * Fluxo:
- *   1. Se o contato tem apenas 1 empresa → template de empresa única,
- *      tom definido pelos dias de atraso dessa empresa.
- *   2. Se o contato tem N empresas → template multi-empresa,
- *      ton definido pela empresa de maior urgência,
- *      empresas ordenadas da mais crítica para a menos crítica.
- *
- * @param {object} group - { phone, contact, empresas[] }
- * @returns {string} Mensagem pronta para envio
- */
 function generateMessage(group) {
   const greeting = getGreeting();
   const { contact, empresas } = group;
 
-  // Ordena empresas: mais crítica (maior atraso) primeiro
   const sorted = [...empresas].sort((a, b) => b.delayDays - a.delayDays);
 
   if (sorted.length === 1) {
     const empresa = sorted[0];
-    const level   = getUrgencyLevel(empresa.delayDays);
+    const level = getUrgencyLevel(empresa.delayDays);
     return SINGLE_COMPANY_TEMPLATES[level]({ greeting, contact, empresa });
   }
 
-  // Múltiplas empresas
   const maxLevel = getMaxUrgency(sorted);
-  const lista    = buildEmpresaList(sorted);
+  const lista = buildEmpresaList(sorted);
   return MULTI_COMPANY_TEMPLATES[maxLevel]({ greeting, contact, empresas: sorted, lista });
 }
 
 module.exports = {
   generateMessage,
-  // Exportados para testes unitários
   pluralizeBoleto,
   pluralizeBoletoComArtigo,
   pluralizeValor,

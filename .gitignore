@@ -4,8 +4,14 @@ node_modules
 .env
 data/client.csv
 data/client.json
+last_run.json
 data/client 07-05-2026.csv
 data/client 11-05-2026.csv
 data/client 12-05-2026.csv
 data/client 13-05-2026.csv
 data/client 15-05-2026.csv
+data/client 18-05-2026.csv
+data/client 19-05-2026.csv
+data/client 20-05-2026.csv
+
+
