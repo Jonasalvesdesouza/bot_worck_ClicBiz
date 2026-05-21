@@ -15,8 +15,11 @@ function groupByPhone(customers) {
     }
     const grupo = map.get(key);
 
-    // Evita duplicidade da mesma empresa no mesmo grupo
-    const jaExiste = grupo.empresas.some(e => e.company === c.company);
+    // Usa Set para evitar duplicidade de empresa
+    const empresaKey = `${c.company}|${c.valorComJuros}|${c.delayDays}`;
+    const jaExiste = grupo.empresas.some(e => 
+      e.company === c.company && e.valorComJuros === c.valorComJuros
+    );
     if (!jaExiste) {
       grupo.empresas.push({
         company: c.company,

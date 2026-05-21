@@ -1,17 +1,22 @@
 const fs = require('fs');
 const csv = require('csv-parser');
 const iconv = require('iconv-lite');
-const { CSV_FILE, CSV_SEPARATOR } = require('../config/env');
-const { extractPhone, extractContact } = require('../utils/phone');
-const { normalizeName } = require('../utils/normalizeName');
+const { CSV_FILE, CSV_SEPARATOR, MULTI_VALUE_SEPARATOR } = require('../config/env');
+const { extractPhone, extractContact } = require('./phone');
+const { normalizeName } = require('./normalizeName');
 
 function splitMultiValue(value) {
   if (!value || typeof value !== 'string') return [];
-  return value.split(';').map(v => v.trim()).filter(v => v !== '');
+  return value.split(MULTI_VALUE_SEPARATOR).map(v => v.trim()).filter(v => v !== '');
 }
 
 function normalizeColumnName(name) {
   return name.trim().replace(/^\uFEFF/, '').replace(/\s+/g, ' ').trim();
+}
+
+function sanitizeNumber(value, defaultValue = 0) {
+  const num = Number(value);
+  return isNaN(num) ? defaultValue : num;
 }
 
 async function convertCsvToJson() {
@@ -38,7 +43,6 @@ async function convertCsvToJson() {
           headersLogged = true;
         }
 
-        // O telefone e contato estão na coluna "Nome Cliente" (devido a deslocamento)
         const nomeCliente = row['Nome Cliente'] || '';
         if (!nomeCliente) return;
 
@@ -55,11 +59,10 @@ async function convertCsvToJson() {
           return;
         }
 
-        const codCliente = row['Cod Cliente'] || '';
         const company = row['Empresa'] || 'Empresa não informada';
-        const delayDays = Number(row['Dias de Atraso']) || 0;
+        const delayDays = sanitizeNumber(row['Dias de Atraso'], 0);
 
-        // Processa boletos
+        // Processa boletos com separador configurável
         const titulosRaw = row['Título'] || '';
         const datasRaw = row['Dt Venc'] || '';
         const valoresRaw = row['Vl Título'] || '';
@@ -69,10 +72,16 @@ async function convertCsvToJson() {
         const valores = splitMultiValue(valoresRaw);
 
         let boletos = [];
-        const hasMultiple = titulos.length > 1 || datas.length > 1 || valores.length > 1;
-
-        if (hasMultiple) {
-          const maxLen = Math.max(titulos.length, datas.length, valores.length);
+        const maxLen = Math.max(titulos.length, datas.length, valores.length);
+        if (maxLen === 0 && (titulosRaw || datasRaw || valoresRaw)) {
+          // Caso singular sem separador
+          boletos.push({
+            titulo: titulosRaw || 'Título não informado',
+            situacao: row['Situação'] || '',
+            dtVenc: datasRaw,
+            vlTitulo: valoresRaw,
+          });
+        } else {
           for (let i = 0; i < maxLen; i++) {
             const titulo = titulos[i] || (i === 0 ? titulosRaw : '');
             const dtVenc = datas[i] || (i === 0 ? datasRaw : '');
@@ -86,19 +95,11 @@ async function convertCsvToJson() {
               });
             }
           }
-        } else {
-          boletos.push({
-            titulo: titulosRaw || 'Título não informado',
-            situacao: row['Situação'] || '',
-            dtVenc: datasRaw,
-            vlTitulo: valoresRaw,
-          });
         }
 
         customers.push({
           phone,
           contact,
-          codCliente,
           company,
           valorComJuros: rawValue,
           delayDays,
